@@ -5,10 +5,9 @@
  */
 
 const path = require(`path`)
-const { createFilePath } = require(`gatsby-source-filesystem`)
 
 // Define the template for blog post
-const blogPost = path.resolve(`./src/templates/blog-post.js`)
+const blogPost = path.resolve(`./src/templates/blog-post-contentful.js`)
 
 /**
  * @type {import('gatsby').GatsbyNode['createPages']}
@@ -19,14 +18,22 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
   // Get all markdown blog posts sorted by date
   const result = await graphql(`
     {
-      allMarkdownRemark(sort: { frontmatter: { date: ASC } }, limit: 1000) {
-        nodes {
-          id
-          fields {
-            slug
-          }
+      allContentfulPost {
+    totalCount
+    edges {
+      node {
+        title
+        slug
+        author
+        content {
+          raw
+        }
+        image {
+          url
         }
       }
+    }
+  }
     }
   `)
 
@@ -38,7 +45,7 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
     return
   }
 
-  const posts = result.data.allMarkdownRemark.nodes
+  const posts = result.data.allContentfulPost.edges
 
   // Create blog posts pages
   // But only if there's at least one markdown file found at "content/blog" (defined in gatsby-config.js)
@@ -46,35 +53,18 @@ exports.createPages = async ({ graphql, actions, reporter }) => {
 
   if (posts.length > 0) {
     posts.forEach((post, index) => {
-      const previousPostId = index === 0 ? null : posts[index - 1].id
-      const nextPostId = index === posts.length - 1 ? null : posts[index + 1].id
+      const previous = index === 0 ? null : posts[index - 1].node
+      const next= index === posts.length - 1 ? null : posts[index + 1].node
 
       createPage({
-        path: post.fields.slug,
+        path: post.node.slug,
         component: blogPost,
         context: {
-          id: post.id,
-          previousPostId,
-          nextPostId,
+          slug: post.node.slug,
+          previous,
+          next,
         },
       })
-    })
-  }
-}
-
-/**
- * @type {import('gatsby').GatsbyNode['onCreateNode']}
- */
-exports.onCreateNode = ({ node, actions, getNode }) => {
-  const { createNodeField } = actions
-
-  if (node.internal.type === `MarkdownRemark`) {
-    const value = createFilePath({ node, getNode })
-
-    createNodeField({
-      name: `slug`,
-      node,
-      value,
     })
   }
 }

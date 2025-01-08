@@ -1,7 +1,10 @@
 import * as React from "react"
 import { Link } from "gatsby"
+import Navbar from "./Navbar"
+import { useLocation } from "@reach/router"  // Import the useLocation hook
 
-const Layout = ({ location, title, children }) => {
+const Layout = ({ title, children }) => {
+  const location = useLocation() // Use the useLocation hook to get the current location
   const rootPath = `${__PATH_PREFIX__}/`
   const isRootPath = location.pathname === rootPath
   let header
@@ -22,6 +25,7 @@ const Layout = ({ location, title, children }) => {
 
   return (
     <div className="global-wrapper" data-is-root-path={isRootPath}>
+      <Navbar />
       <header className="global-header">{header}</header>
       <main>{children}</main>
       <footer>

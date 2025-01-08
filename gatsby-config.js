@@ -7,6 +7,10 @@
 /**
  * @type {import('gatsby').GatsbyConfig}
  */
+const dotenv = require('dotenv')
+if (process.env.NODEENV !== 'production'){
+  dotenv.config()
+}
 module.exports = {
   siteMetadata: {
     title: `Gatsby Starter Blog`,
@@ -22,6 +26,13 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-image`,
+    {
+      resolve: `gatsby-source-contentful`,
+      options:{
+        spaceId:`jo6yvbbl7m0n`,
+        accessToken: process.env.CONTENTFUL_ACCESS_TOKEN
+      }
+    },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
